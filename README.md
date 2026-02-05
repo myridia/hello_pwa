@@ -83,3 +83,9 @@ GNU
 
 **Note:** This is a basic starter project.  For more advanced PWA features, such as push notifications and background sync, you'll need to add additional code and configure the necessary services.
 
+
+## Add this to your nginx docker settings
+```
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Cross-Origin-Embedder-Policy "require-corp" always;
+```
