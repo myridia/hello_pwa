@@ -5,14 +5,15 @@
             <ul>
 	            <li><strong>My App</strong></li>
 		          </ul>
-			        <ul>
+       <ul>
 				        <li><a href="#">Home</a></li>
-					        <li><a href="#">About</a></li>
-						        <li><a href="#">Contact</a></li>
+					        <li><a href="#features" class="install_app">Install App</a></li>
+						        <li><a class="contrast refresh" href="#signup">Refresh</a></li>
 							      </ul>
 							          </nav>
 								    </header>
 								    </template>
+
 
 <style scoped>
 .fixed-header {
