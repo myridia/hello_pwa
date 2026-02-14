@@ -2,6 +2,7 @@
 <header class="container-fluid is-fixed-above-lg">
   <nav>
     <ul>
+      <li><img src="/img/icon.png" alt="logo"></li>      
       <li><strong>My App</strong></li>
     </ul>
     <ul>
