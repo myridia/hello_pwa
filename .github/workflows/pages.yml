@@ -25,6 +25,8 @@ jobs:
       - name: Compile
         run: |
          sudo apt-get install npm -y
+         npm install 
+         npm run build
         #  npm install
         #  npm run dist
       #- name: Setup Pages
