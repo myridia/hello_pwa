@@ -1,19 +1,5 @@
 import sqlite3InitModule from "@sqlite.org/sqlite-wasm";
 
-const assets = [
-  "./",
-  "./index.html",
-  "./favicon.png",
-  "./js/log2textarea.js",
-  "./js/main.js",
-  "./css/pico.css",
-  "./css/app.css",
-  "./img/icon.png",
-  "./img/landing.png",
-  "./img/logo.png",
-  "./img/screenshot.png",
-];
-
 self.addEventListener("install", (installEvent) => {
   self.skipWaiting();
   installEvent.waitUntil(

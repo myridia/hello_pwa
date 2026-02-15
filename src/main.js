@@ -11,17 +11,43 @@ let install_prompt = null;
 let $install_pwa = document.querySelector("#install_pwa");
 let $refresh_pwa = document.querySelector("#refresh_pwa");
 
+// Register Service Worker
+const register_sw = async () => {
+  if ("serviceWorker" in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.register(
+        "/service_worker.js",
+        {
+          scope: "/",
+        },
+      );
+      if (registration.installing) {
+        log.info("...service worker installing");
+      } else if (registration.waiting) {
+        log.info("...service worker installed");
+      } else if (registration.active) {
+        log.info("...service worker active");
+
+        const $refresh_pwa = document.querySelector("#refresh_pwa");
+        $refresh_pwa.addEventListener("click", () => {
+          log.info("update service worker registered");
+          registration.unregister().then((boolean) => {
+            window.location.reload(true);
+          });
+        });
+
+        return registration;
+      }
+    } catch (error) {
+      console.error(`Registration failed with ${error}`);
+    }
+  }
+};
+
 let worker = new Worker(new URL("./db_worker.js", import.meta.url), {
   type: "module",
 });
 
-/*
-$refresh_pwa.addEventListener("click", () => {
-  worker.unregister().then((boolean) => {
-    window.location.reload(true);
-  });
-});
-*/
 const $iniciarBaseDeDatos = document.querySelector("#btnIniciarBaseDeDatos"),
   $insertar = document.querySelector("#btnInsertar"),
   $obtener = document.querySelector("#btnObtener"),
@@ -64,7 +90,7 @@ worker.onmessage = (evento) => {
 };
 
 window.addEventListener("beforeinstallprompt", (event) => {
-  console.log("...pwa can be installed!");
+  console.log("...Desktop PWA can be installed!");
   event.preventDefault();
 
   install_prompt = event;
