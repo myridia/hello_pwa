@@ -1,26 +1,63 @@
 import { createApp } from "vue";
+import App from "./vue/App.vue";
 import "@picocss/pico/css/pico.css";
+import Log2textarea from "log2textarea/log2textarea.js";
+//import "./js/dist/log2textarea.js";
+//import Log2textarea from "./js/log2textarea/index.js";
 import "./css/app.css";
 import "./js/app.js";
-import App from "./App.vue";
-//import './registerServiceWorker'
+const log = new Log2textarea("logger");
 
 const app = createApp(App);
 app.mount("#app");
 
 let install_prompt = null;
-let $install_button = document.querySelector(".install_app");
 let $install_pwa = document.querySelector("#install_pwa");
+let $refresh_pwa = document.querySelector("#refresh_pwa");
 
-const worker = new Worker(new URL("./db.js", import.meta.url), {
+// Register Service Worker
+const register_sw = async () => {
+  if ("serviceWorker" in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.register(
+        "/service_worker.js",
+        {
+          scope: "/",
+        },
+      );
+      if (registration.installing) {
+        log.info("...service worker installing");
+      } else if (registration.waiting) {
+        log.info("...service worker installed");
+      } else if (registration.active) {
+        log.info("...service worker active");
+
+        const $refresh_pwa = document.querySelector("#refresh_pwa");
+        $refresh_pwa.addEventListener("click", () => {
+          log.info("update service worker registered");
+          registration.unregister().then((boolean) => {
+            window.location.reload(true);
+          });
+        });
+
+        return registration;
+      }
+    } catch (error) {
+      console.error(`Registration failed with ${error}`);
+    }
+  }
+};
+
+let worker = new Worker(new URL("./db_worker.js", import.meta.url), {
   type: "module",
 });
-const $iniciarBaseDeDatos = document.querySelector("#btnIniciarBaseDeDatos"),
-  $insertar = document.querySelector("#btnInsertar"),
-  $obtener = document.querySelector("#btnObtener"),
-  $nombre = document.querySelector("#nombre"),
-  $fechaNacimiento = document.querySelector("#fechaNacimiento"),
-  $contenedorPersonas = document.querySelector("#contenedorPersonas");
+
+const $iniciarBaseDeDatos = document.querySelector("#btnIniciarBaseDeDatos");
+const $insertar = document.querySelector("#btnInsertar");
+const $obtener = document.querySelector("#btnObtener");
+const $nombre = document.querySelector("#nombre");
+const $fechaNacimiento = document.querySelector("#fechaNacimiento");
+const $contenedorPersonas = document.querySelector("#contenedorPersonas");
 
 $insertar.addEventListener("click", () => {
   worker.postMessage([
@@ -28,12 +65,15 @@ $insertar.addEventListener("click", () => {
     { nombre: $nombre.value, fechaNacimiento: $fechaNacimiento.value },
   ]);
 });
+
 $obtener.addEventListener("click", () => {
   worker.postMessage(["obtener_personas"]);
 });
+
 $iniciarBaseDeDatos.onclick = () => {
   worker.postMessage(["iniciar"]);
 };
+
 worker.onmessage = (evento) => {
   const accion = evento.data[0];
   const argumentos = evento.data[1];
@@ -44,8 +84,15 @@ worker.onmessage = (evento) => {
       );
       break;
     case "persona_insertada":
-      console.log({ argumentos });
+      //console.log({ argumentos });
+      log.info("...persona insertada");
       break;
+
+    case "log_message":
+      //console.log({ argumentos });
+      log.info(argumentos);
+      break;
+
     case "personas_obtenidas":
       const personas = argumentos;
       $contenedorPersonas.innerHTML = "";
@@ -57,7 +104,7 @@ worker.onmessage = (evento) => {
 };
 
 window.addEventListener("beforeinstallprompt", (event) => {
-  console.log("...pwa can be installed!");
+  console.log("...Desktop PWA can be installed!");
   event.preventDefault();
 
   install_prompt = event;
@@ -73,7 +120,7 @@ window.addEventListener("beforeinstallprompt", (event) => {
         console.log("User dismissed the A2HS install app prompt");
       }
       install_prompt = null;
-      $install_button.classList.add("is-hidden");
+      $install_pwa.classList.add("is-hidden");
     });
   });
 });

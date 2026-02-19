@@ -1,19 +1,5 @@
 import sqlite3InitModule from "@sqlite.org/sqlite-wasm";
 
-const assets = [
-  "./",
-  "./index.html",
-  "./favicon.png",
-  "./js/log2textarea.js",
-  "./js/main.js",
-  "./css/pico.css",
-  "./css/app.css",
-  "./img/icon.png",
-  "./img/landing.png",
-  "./img/logo.png",
-  "./img/screenshot.png",
-];
-
 self.addEventListener("install", (installEvent) => {
   self.skipWaiting();
   installEvent.waitUntil(
@@ -57,16 +43,13 @@ const iniciar = async () => {
   });
   if ("opfs" in sqlite3) {
     db = new sqlite3.oo1.OpfsDb(NOMBRE_BASE_DE_DATOS);
-    console.log(
-      "OPFS is available, created persisted database at",
-      db.filename,
-    );
+    let msg = "OPFS is available, created persisted database at " + db.filename;
+    self.postMessage(["log_message", msg]);
   } else {
     db = new sqlite3.oo1.DB(NOMBRE_BASE_DE_DATOS, "ct");
-    console.log(
-      "OPFS is not available, created transient database",
-      db.filename,
-    );
+    const msg =
+      "OPFS is not available, created transient database" + db.filename;
+    self.postMessage(["log_message", msg]);
   }
   await db.exec(`CREATE TABLE IF NOT EXISTS personas(
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
